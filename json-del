@@ -1,0 +1,11 @@
+#!/bin/sh
+# set -x #debug
+
+# Este comando se utilizó para limpiar los lugares de la información del narco y
+# generar un diccionario de lugares.
+
+TERMINO="$1"
+shift
+FILES="$@"
+echo "$TERMINO" >> /home/joshpar/inmegen/literature/text_processing/data/narco/lugares
+sed -i -e 's/^[ \t]\+"'"$TERMINO"'",\?[ \t]*$//g' $FILES
