@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Delete trailing spaces from a file
+# and add a newline at the end if it's not there
+#set -x # debug
+
+FILE=$1
+[ -n "$FILE" ] && OPTS="-i $FILE"
+
+sed -e "s/\s*$//" -e '$a\' $OPTS

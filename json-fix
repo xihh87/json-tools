@@ -1,0 +1,19 @@
+#!/bin/sh
+#set -x #debug
+
+for f in $@; do
+
+	cat "$f" | \
+	# eliminar elementos vacíos
+	ssam -e ', x#[ \t]+"[0-9]+":[ \t]*\[[ \t\n]+\],*# d' | \
+	# limpiar espacios sobrantes
+	trail | \
+	# eliminar dobles saltos de línea
+	ssam -e ', x#\n+# c#\n#' | \
+	# Agregar comas en los arreglos sin terminar
+	ssam -e ", x#\[.*\]# x#\"[^\"]*\",?# s#,?$#,#" | \
+	# eliminar comas finales
+	ssam -e ', x#,[\n\t ]+\]# x#,# d' > "$f.2"
+	mv "$f.2" "$f"
+
+done
