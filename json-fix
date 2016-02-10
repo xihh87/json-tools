@@ -1,5 +1,5 @@
 #!/bin/sh
-set -x #debug
+#set -x #debug
 
 usage() {
 	echo "$(basename $0) [-h] [-i] [ file1 ... file_n ]"
