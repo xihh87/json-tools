@@ -9,7 +9,7 @@ DICT=palabras-eliminadas.dict
 
 usage() {
 	echo $(basename $0) "[-h] [-f diccionario] termino-a-borrar archivo_1 [ ... archivo_n ]"
-	exit 0
+	exit 1
 }
 
 for opt do
