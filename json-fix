@@ -1,19 +1,57 @@
 #!/bin/sh
-#set -x #debug
+set -x #debug
 
-for f in $@; do
+usage() {
+	echo "$(basename $0) [-h] [-i] [ file1 ... file_n ]"
+}
 
-	cat "$f" | \
+opts() {
+	for opt; do
+		case "$opt" in
+		-h)
+			usage
+		;;
+		-i)
+			EXEC=inline
+		;;
+		*)
+			FILES+="$opt"
+		;;
+		esac
+	done
+	[ ${#FILES[@]} -eq 0 ] && FILES+="-"
+}
+
+json_fix() {
+	local FILE="$1"
 	# eliminar elementos vacíos
-	ssam -e ', x#[ \t]+"[0-9]+":[ \t]*\[[ \t\n]+\],*# d' | \
+	ssam -e ', x#[ \t]+"[0-9]+":[ \t]*\[[ \t\n]+\],*# d' "$FILE" | \
 	# limpiar espacios sobrantes
 	trail | \
 	# eliminar dobles saltos de línea
 	ssam -e ', x#\n+# c#\n#' | \
 	# Agregar comas en los arreglos sin terminar
-	ssam -e ", x#\[.*\]# x#\"[^\"]*\",?# s#,?$#,#" | \
+	ssam -e ", x#\[([^\]]|\n)*\]# x#\"[^\"]*\"# a#,#" | \
+	ssam -e ", x#,,+# c#,#" | \
 	# eliminar comas finales
-	ssam -e ', x#,[\n\t ]+\]# x#,# d' > "$f.2"
-	mv "$f.2" "$f"
+	ssam -e ', x#,[\n\t ]+\]# x#,# d'
+}
 
-done
+inline() {
+	local FILE="$1"
+	json_fix > "$FILE.2"
+	mv "$FILE.2" "$FILE"
+}
+
+main() {
+	EXEC=json_fix
+	FILES=()
+
+	opts "$@"
+
+	for f in "${FILES[@]}"; do
+		$EXEC "$f"
+	done
+}
+
+main "$@"
